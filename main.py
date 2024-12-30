@@ -84,6 +84,7 @@ def http_optimize_profile(request):
         "Access-Control-Allow-Methods": "POST",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Max-Age": "3600",
+        "Content-Type": "application/json"
     }
 
     # Set CORS headers for the preflight request
@@ -95,7 +96,7 @@ def http_optimize_profile(request):
 
     req_data = request.get_json()
 
-    if "profile" not in req_data:
+    if req_data is None or "profile" not in req_data:
         return Response("{'error': 'No parameters found'}")
 
     # Because it is a public API, we only allow loading dummy data
@@ -107,9 +108,9 @@ def http_optimize_profile(request):
         return Response("{'error': 'No data returned'}", 400)
 
     req_suggestion: DateProfileSuggestion = get_suggestions(treq, "potential")
-    req_suggestion_str: str = json.dumps(req_suggestion.json())
+    req_suggestion_json = req_suggestion.json()
 
-    return Response(req_suggestion_str, status=200)
+    return Response(req_suggestion_json, status=200, headers=headers)
 
 
 def test_http_request():
