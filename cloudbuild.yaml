@@ -1,0 +1,14 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - functions
+      - deploy
+      - suggest  # Replace with your function name
+      - --runtime=python312
+      - --trigger-http
+      - --allow-unauthenticated
+      - --entry-point=http_optimize_profile  # Replace with your entry point function
+      - --region=us-central1  # Replace with your desired region
+      - --max-instances=2
+options:
+  logging: CLOUD_LOGGING_ONLY
