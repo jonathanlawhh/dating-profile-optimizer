@@ -81,7 +81,7 @@ def http_optimize_profile(request):
 
     headers = {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
+        "Access-Control-Allow-Methods": "GET,POST",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Max-Age": "3600",
         "Content-Type": "application/json"
@@ -101,11 +101,38 @@ def http_optimize_profile(request):
 
     # Because it is a public API, we only allow loading dummy data
     treq = Tinder()
+
     treq.get_local_dates(req_data["country"] if req_data["country"] else "MY")
     treq.load_custom_profile(req_data["profile"])
 
     if treq.dates == [] or treq.profile == {}:
         return Response("{'error': 'No data returned'}", 400)
+
+    # If there are no bio data, do not waste time and return a dummy response
+    if treq.profile["user"]["bio"] == "":
+        return Response(json.dumps({
+            "suggestions": [
+                {
+                    "current": "No bio provided",
+                    "suggestion": "Create a more engaging bio that showcases personality; include humor or interesting experiences.",
+                    "example_for_bio": "Just a yoga enthusiast on a quest for the best avocado toast in town!",
+                    "example_from_potential_dates": "Natas shares a playful bio about spaghetti being her love language."
+                },
+                {
+                    "current": "Limited job info",
+                    "suggestion": "Include more about your occupation or what you’re passionate about in your professional life.",
+                    "example_for_bio": "Currently a freelance creative and always looking for inspiration.",
+                    "example_from_potential_dates": "Syahi and Kyra mentioned their jobs, which adds to connection potential."
+                },
+                {
+                    "current": "No common interests listed",
+                    "suggestion": "Engage potential matches by adding common interests like 'Dining out' or 'Traveling'.",
+                    "example_for_bio": "A foodie at heart who loves exploring new restaurants and traveling to unique places.",
+                    "example_from_potential_dates": "Alici and Amali enjoy food tours and trying new cuisines."
+                }
+            ],
+            "common_dates_interest": "Hiking and exploring coffee shops"
+        }), status=200, headers=headers)
 
     req_suggestion: DateProfileSuggestion = get_suggestions(treq, "potential")
     req_suggestion_json = req_suggestion.json()
@@ -121,7 +148,7 @@ def test_http_request():
             "profile": {
                 "spotify": False,
                 "traveling": False,
-                "bio": "Software Tester",
+                "bio": "",
                 "birth_date": "1999-01-01",
                 "interest": ["IT", "Technology", "Science", "Engineering"],
                 "descriptors": [],

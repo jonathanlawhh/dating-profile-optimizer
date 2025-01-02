@@ -2,6 +2,7 @@
 /*.json
 .idea/
 local_private_data
+local_data/*20*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
